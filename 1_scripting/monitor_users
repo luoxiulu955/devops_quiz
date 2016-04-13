@@ -1,0 +1,70 @@
+#!/bin/sh
+#
+# Purpose: Monitoring how many users are logged into a system
+# Usage: ./monitor_users -w 5 -c 10 -u root
+
+#Usage info
+usage () {
+	echo "Usage: ./monitor_users -w <warning> -c <critical> -u <user>"
+	echo "Options:"
+	echo "        -w(--warning)        warning threshold for the number of logged users (5 by default)"
+	echo "        -c(--critical)       critical threshold for the number of logged users (10 by default)" 
+	echo "        -u(--user)           check the number of specific user (optional)"
+	
+}
+
+#Init default values
+warning=5
+critical=10
+
+#Process args
+while [ $# -gt 0 ];do
+	case $1 in		
+	-h | --help)
+		usage
+		exit 0
+		;;
+	-w | --warning)
+		warning=$2
+		shift
+		;;
+	-c | --critical)
+		critical=$2
+		shift
+		;;
+	-u | --user)
+		user=$2
+		shift
+		;;
+	*)
+		usage
+		exit 3
+		;;
+	esac
+	shift
+done
+
+#Check if critical threshold is greater than warning threshold
+if [ $warning -ge $critical ];then
+        echo "UNKNOWN: Warning threshold: $warning must be less than critical threshold: $critical !"
+        exit 3
+fi
+
+#Get number of users(or specific users) which are logged into the system
+if [ -z $user ];then
+        count=$(who | wc -l)
+else
+        count=$(who | grep $user | wc -l)
+fi
+
+#Print results
+if [ $count -lt $warning ];then
+        echo "OK - $count users are logged into the system. |COUNT=$count;;;;"
+        exit 0
+elif [ $count -ge $warning ] && [ $count -lt $critical ];then
+        echo "WARNING - $count users are logged into the system. |COUNT=$count;;;;"
+        exit 1
+elif [ $count -ge $critical ];then
+        echo "CRITICAL: $count users are logged into the system. |COUNT=$count;;;;"
+        exit 2
+fi
