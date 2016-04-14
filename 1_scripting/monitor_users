@@ -65,6 +65,6 @@ elif [ $count -ge $warning ] && [ $count -lt $critical ];then
         echo "WARNING - $count users are logged into the system. |COUNT=$count;;;;"
         exit 1
 elif [ $count -ge $critical ];then
-        echo "CRITICAL: $count users are logged into the system. |COUNT=$count;;;;"
+        echo "CRITICAL - $count users are logged into the system. |COUNT=$count;;;;"
         exit 2
 fi
